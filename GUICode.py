@@ -18,7 +18,6 @@ import streamlit as st
 class GLMui():
     def __init__(self):
         self.prompt = "这里是聊天内容"
-
     def loaclGLMPage(self):
         with st.container():
             #标题页面的容器
@@ -65,7 +64,16 @@ class GLMui():
                 st.markdown("这是另外一个页面了")
     def chatGLMPahe(self):
         chatpage,promppage=st.tabs(["GLM对话","提示词配置"]) #对页面进行标签分页
+        if "promtnamelist" not in st.session_state:
+            st.session_state["promtnamelist"] = ["袁祖成模板", "梁桂和模板", "基础模板"]
 
+        # 侧边栏
+        with st.sidebar:
+            st.header("功能按钮")
+            functionare = st.container(height=300)  # 定义功能按钮区域
+            selectresult = functionare.selectbox("提示词模板", st.session_state["promtnamelist"])  # 提示词模板选择
+
+            st.button("清空会话记录", on_click=self._historymessage, args=(True,))  # 点击清空历史记录,优雅的实现
         #主页面
         with chatpage:
             st.header("对话信息")
@@ -84,15 +92,20 @@ class GLMui():
                 for _message in userinput_history_dict:
                     messages.chat_message("user").write(_message["User"]) #显示用户输入的
         with promppage:
-            st.header("提示词信息")
+            st.header("提示词模板信息")
+            prompt_msgcontainer = st.container(height=320,border=False)
 
-        #侧边栏
-        with st.sidebar:
-            st.header("功能按钮")
-            functionare = st.container(height=300) #定义功能按钮区域
-            selectresult=functionare.selectbox("提示词模板",["袁祖成模板","梁桂和模板","基础模板"]) #提示词模板选择
+            #根据选择标签选择模板信息的逻辑，根据选择的标签读取相应的提示词模板
+            for promtname in st.session_state["promtnamelist"]: #标签组与选择组循环比对
+                if selectresult ==promtname:
+                    prompt_name = prompt_msgcontainer.text_input(f"{selectresult}内容", key="")
+            but1,but2,but3=st.columns([1,1,5]) #实现两个按钮能整齐排列
+            but1.button("修改模板")
+            but2.button("取消修改")
 
-            st.button("清空会话记录",on_click=self._historymessage,args=(True,)) #点击清空历史记录,优雅的实现
+
+
+
 
     def _historymessage(self,clear_msg=False):
         """
@@ -111,3 +124,5 @@ class GLMui():
                 print(st.session_state["chat1history"])
                 return st.session_state["chat1history"]
 
+    def _addpromtlist(self):
+        pass
