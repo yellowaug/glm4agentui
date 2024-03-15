@@ -1,19 +1,5 @@
 import streamlit as st
-
-# def test():
-#     st.title("This is a test")
-#
-# def test1():
-#     with st.container():
-#         st.title("This is a test")
-#         prompt = st.chat_input("Say something")
-#         if prompt:
-#             st.write(f"User has sent the following prompt: {prompt}")
-#
-#     with st.container():
-#         st.sidebar.title("测试")
-#         opt=st.sidebar.selectbox("选择",["测试1","测试2"])
-#         print(opt)
+from LocalFile import LocalPromptYml
 
 class GLMui():
     def __init__(self):
@@ -94,13 +80,20 @@ class GLMui():
         with promppage:
             st.header("提示词模板信息")
             prompt_msgcontainer = st.container(height=320,border=False)
-
+            _ymlcontent=self._readpromptcontent()
             #根据选择标签选择模板信息的逻辑，根据选择的标签读取相应的提示词模板
             for promtname in st.session_state["promtnamelist"]: #标签组与选择组循环比对
+                #根据标签名称读取不同人员的模板内容，人员列表是固定的。
                 if selectresult ==promtname:
-                    prompt_name = prompt_msgcontainer.text_input(f"{selectresult}内容", key="")
+                    if promtname=="袁祖成模板":
+                        prompt_name = prompt_msgcontainer.text_input(f"{selectresult}内容", value=_ymlcontent.get("yzc"))
+                    elif promtname=="梁桂和模板":
+                        prompt_name = prompt_msgcontainer.text_input(f"{selectresult}内容", value=_ymlcontent.get("lgh"))
+                    elif promtname=="基础模板":
+                        prompt_name = prompt_msgcontainer.text_input(f"{selectresult}内容", value=_ymlcontent.get("base"))
+                    print(prompt_name)
             but1,but2,but3=st.columns([1,1,5]) #实现两个按钮能整齐排列
-            but1.button("修改模板")
+            but1.button("修改模板",on_click=self._writepromptcontent,args=(prompt_name,))
             but2.button("取消修改")
 
 
@@ -124,5 +117,9 @@ class GLMui():
                 print(st.session_state["chat1history"])
                 return st.session_state["chat1history"]
 
-    def _addpromtlist(self):
-        pass
+    def _readpromptcontent(self):
+        localyml = LocalPromptYml(user_input_path="prompt.yaml")
+        return localyml.read_prompt()
+    def _writepromptcontent(self,promptcontent):
+        print(f"这是用户输入{promptcontent}")
+
